@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = 'https://ai-fitness-coach-app-project-48tt.onrender.com/api';
+// For local testing - change to production URL when deploying
+const API_BASE = 'http://localhost:5000/api';
 export const generatePlan = async (userData) => {
   const response = await axios.post(`${API_BASE}/generate-plan`, userData);
   return response.data;
