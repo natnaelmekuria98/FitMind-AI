@@ -1,0 +1,38 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "DHAMODHARAN S",
+  "license": "ISC",
+  "description": "An AI-powered fitness assistant built using Next.js that generates personalized workout and diet plans using LLMs.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhamodharanECE/AI-Fitness-Coach-App.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dhamodharanECE/AI-Fitness-Coach-App/issues"
+  },
+  "homepage": "https://github.com/dhamodharanECE/AI-Fitness-Coach-App#readme",
+  "dependencies": {
+    "@google/genai": "^1.31.0",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "elevenlabs": "^1.59.0",
+    "express": "^5.2.1",
+    "framer-motion": "^12.23.25",
+    "groq-sdk": "^0.37.0",
+    "jspdf": "^3.0.4",
+    "lucide-react": "^0.556.0",
+    "mongoose": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}

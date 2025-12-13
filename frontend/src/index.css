@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force dark background immediately to test */
+body {
+  background-color: #020617; 
+  color: white;
+}
