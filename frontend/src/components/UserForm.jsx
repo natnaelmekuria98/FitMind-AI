@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 const UserForm = ({ onSubmit, loading }) => {
   const [formData, setFormData] = useState({
     name: '', age: '', gender: 'Male', weight: '',
-    goal: 'Weight Loss', level: 'Beginner', location: 'Gym', dietary: 'Non-Veg'
+    goal: 'Weight Loss', level: 'Beginner', location: 'Gym', dietary: 'Non-Veg', model: 'gemini'
   });
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -62,6 +62,13 @@ const UserForm = ({ onSubmit, loading }) => {
           <label className={labelClass}>Dietary Preference</label>
           <select name="dietary" onChange={handleChange} className={inputClass}>
             <option>Non-Veg</option><option>Veg</option><option>Vegan</option><option>Keto</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>AI Model</label>
+          <select name="model" onChange={handleChange} value={formData.model} className={inputClass}>
+            <option value="gemini">Google Gemini 2.5 Flash</option>
+            <option value="openai">OpenAI GPT-4o Mini</option>
           </select>
         </div>
       </div>

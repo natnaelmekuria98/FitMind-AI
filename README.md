@@ -2,11 +2,13 @@
 
 An AI-powered web application that generates fully personalized workout routines and diet plans based on user goals, body 
 
-type, and dietary preferences. Powered by **Google Gemini AI** for intelligence and **Pollinations.ai** for visual generation.
+type, and dietary preferences. Powered by **Google Gemini AI** or **OpenAI GPT-4o Mini** for intelligence and **Pollinations.ai** for visual generation.
 
 # 🚀 Features
 
 - **Personalized Plans:** Generates 7-day workout and diet schedules using LLMs.
+
+- **Multiple AI Models:** Choose between Google Gemini 2.5 Flash or OpenAI GPT-4o Mini via dropdown selector.
 
 - **AI Visuals:** Generates realistic images for exercises and meals on the fly.
 
@@ -20,9 +22,9 @@ type, and dietary preferences. Powered by **Google Gemini AI** for intelligence 
 
 - **Frontend:** React (Vite), Tailwind CSS, Framer Motion, Axios, jsPDF.
 
-- **Backend:** Node.js, Express.js, Google Gemini API.
+- **Backend:** Node.js, Express.js, Google Gemini API, OpenAI API.
 
-- **External APIs:** Google Gemini (Text), Pollinations.ai (Images).
+- **External APIs:** Google Gemini (Text), OpenAI GPT-4o Mini (Text), Pollinations.ai (Images).
 
 # 📂 Project Structure
 
@@ -104,25 +106,24 @@ Install dependencies:
 code
 Bash
 ```
-npm install express cors dotenv @google/generative-ai
+npm install express cors dotenv @google/generative-ai openai
 ```
 
 Configure Environment Variables:
 
-Create a file named .env in the backend folder and add your API Key:
+Create a file named .env in the backend folder and add your API Keys:
 
 code
 Env
 ```
 PORT=5000
-```
-# Get this key from 
-```
-https://aistudio.google.com/
-```
-```
+# Get Google API key from https://aistudio.google.com/
 GOOGLE_API_KEY=AIzaSyD_Your_Actual_Key_Here
+# Get OpenAI API key from https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-Your_Actual_Key_Here
 ```
+
+**Note:** You can use either one or both API keys. The application will use the selected model from the frontend dropdown. If a model's API key is missing, you'll see a warning but the server will still run with the available models.
 
 Run the Server:
 
@@ -140,7 +141,10 @@ You should see: Backend running on port 5000
 
 POST /api/generate-plan
 
-Body: { name, age, weight, goal, level, location, dietary }
+Body: { name, age, weight, goal, level, location, dietary, model }
+
+**Parameters:**
+- `model` (optional): Select the LLM model to use. Options: `"gemini"` (default) or `"openai"`
 
 Response: JSON object containing weekly_workout, weekly_diet, motivation, and tips.
 
