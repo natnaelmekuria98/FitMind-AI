@@ -1,53 +1,63 @@
-import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import Hero from './components/Hero';
-import UserForm from './components/UserForm';
-import PlanViewer from './components/PlanViwer';
-import { generatePlan } from './Api/data';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import Dashboard from './components/Dashboard';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 
 function App() {
-  const [step, setStep] = useState(0); 
-  const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState(null);
-
-  const handleFormSubmit = async (formData) => {
-    setLoading(true);
-    try {
-      const data = await generatePlan(formData);
-      setPlan(data);
-      setStep(2);
-    } catch (error) {
-      alert("Failed to generate plan. Ensure Backend is running.");
-    }
-    setLoading(false);
-  };
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white pb-10">
-      {/* Navbar */}
-      <nav className="p-6 max-w-7xl mx-auto flex items-center gap-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg"></div>
-        <h1 className="text-2xl font-black tracking-tighter text-white">FIT<span className="text-blue-500">AI</span></h1>
-      </nav>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route 
+          path="/sign-in/*" 
+          element={
+            <SignedOut>
+              <SignIn />
+            </SignedOut>
+          } 
+        />
+        <Route 
+          path="/sign-up/*" 
+          element={
+            <SignedOut>
+              <SignUp />
+            </SignedOut>
+          } 
+        />
 
-      <main className="container mx-auto px-4">
-        <AnimatePresence mode="wait">
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <>
+              <SignedIn>
+                <Dashboard />
+              </SignedIn>
+              <SignedOut>
+                <RedirectToSignIn />
+              </SignedOut>
+            </>
+          }
+        />
           
-          {step === 0 && (
-            <Hero key="hero" onStart={() => setStep(1)} />
-          )}
-
-          {step === 1 && (
-            <UserForm key="form" onSubmit={handleFormSubmit} loading={loading} />
-          )}
-
-          {step === 2 && plan && (
-            <PlanViewer key="plan" plan={plan} onReset={() => setStep(0)} />
-          )}
-
-        </AnimatePresence>
-      </main>
-    </div>
+        {/* Root redirect */}
+        <Route 
+          path="/" 
+          element={
+            <>
+              <SignedIn>
+                <Navigate to="/dashboard" replace />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+            </>
+          } 
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

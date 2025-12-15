@@ -1,14 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Play, Image as ImageIcon, RefreshCw, Dumbbell, Utensils } from 'lucide-react';
+import { Download, Play, Image as ImageIcon, RefreshCw, Dumbbell, Utensils, TrendingUp, CheckCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { dbService } from '../services/supabase';
 
-
-const PlanViewer = ({ plan, onReset }) => {
-  const [activeTab, setActiveTab] = useState('workout'); // 'workout' | 'diet'
+const PlanViewer = ({ plan, onReset, planId, userId }) => {
+  const [activeTab, setActiveTab] = useState('workout'); // 'workout' | 'diet' | 'progress'
   const [modalImage, setModalImage] = useState(null);
   const [loadingImg, setLoadingImg] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [progressEntries, setProgressEntries] = useState([]);
+  const [showProgressForm, setShowProgressForm] = useState(false);
+  const [progressFormData, setProgressFormData] = useState({
+    workout_completed: false,
+    exercises_completed: [],
+    diet_followed: false,
+    meals_logged: [],
+    energy_level: 5,
+    mood: 'Good',
+    weight_kg: '',
+    notes: ''
+  });
+
+  // Load progress entries when planId is available
+  useEffect(() => {
+    if (planId && userId) {
+      loadProgressEntries();
+    }
+  }, [planId, userId]);
+
+  const loadProgressEntries = async () => {
+    try {
+      const entries = await dbService.getProgressEntries(userId, planId);
+      setProgressEntries(entries);
+    } catch (error) {
+      console.error('Error loading progress entries:', error);
+    }
+  };
+
+  const handleSaveProgress = async () => {
+    if (!planId || !userId) {
+      alert('Plan must be saved first before tracking progress');
+      return;
+    }
+
+    try {
+      await dbService.saveProgressEntry(userId, planId, {
+        ...progressFormData,
+        weight_kg: progressFormData.weight_kg ? parseFloat(progressFormData.weight_kg) : null
+      });
+      
+      // Reset form and reload entries
+      setProgressFormData({
+        workout_completed: false,
+        exercises_completed: [],
+        diet_followed: false,
+        meals_logged: [],
+        energy_level: 5,
+        mood: 'Good',
+        weight_kg: '',
+        notes: ''
+      });
+      setShowProgressForm(false);
+      await loadProgressEntries();
+      alert('Progress saved successfully!');
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      alert('Failed to save progress. Please try again.');
+    }
+  };
 
 
   // Export PDF
@@ -232,6 +292,9 @@ const handleVoice = () => {
       <div className="flex gap-4 mb-6 border-b border-slate-700 pb-1">
         <TabButton active={activeTab === 'workout'} onClick={() => setActiveTab('workout')} icon={<Dumbbell size={18}/>} label="Workout" />
         <TabButton active={activeTab === 'diet'} onClick={() => setActiveTab('diet')} icon={<Utensils size={18}/>} label="Diet" />
+        {planId && (
+          <TabButton active={activeTab === 'progress'} onClick={() => setActiveTab('progress')} icon={<TrendingUp size={18}/>} label="Progress" />
+        )}
         
         <button onClick={handleVoice} className="ml-auto flex items-center gap-2 text-sm text-blue-400 hover:text-white transition-colors">
           <Play size={16} /> Read Day 1
@@ -257,7 +320,7 @@ const handleVoice = () => {
                     ))}
                   </Card>
                 ))
-              ) : (
+              ) : activeTab === 'diet' ? (
                 plan.weekly_diet.map((day, idx) => (
                   <Card key={idx} title={day.day} color="text-emerald-400">
                     {Object.entries(day.meals).map(([type, meal], i) => (
@@ -265,7 +328,19 @@ const handleVoice = () => {
                     ))}
                   </Card>
                 ))
-              )}
+              ) : activeTab === 'progress' ? (
+                <ProgressTrackingView
+                  planId={planId}
+                  userId={userId}
+                  progressEntries={progressEntries}
+                  showProgressForm={showProgressForm}
+                  setShowProgressForm={setShowProgressForm}
+                  progressFormData={progressFormData}
+                  setProgressFormData={setProgressFormData}
+                  onSaveProgress={handleSaveProgress}
+                  onReload={loadProgressEntries}
+                />
+              ) : null}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -324,5 +399,162 @@ const RowItem = ({ title, sub, onImg }) => (
     </button>
   </div>
 );
+
+// Progress Tracking Component
+const ProgressTrackingView = ({
+  planId,
+  userId,
+  progressEntries,
+  showProgressForm,
+  setShowProgressForm,
+  progressFormData,
+  setProgressFormData,
+  onSaveProgress,
+  onReload
+}) => {
+  const moods = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];
+
+  return (
+    <div className="space-y-4">
+      {/* Add Progress Button */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-bold text-white">Your Progress</h3>
+        <button
+          onClick={() => setShowProgressForm(!showProgressForm)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors flex items-center gap-2"
+        >
+          <CheckCircle size={16} />
+          {showProgressForm ? 'Cancel' : 'Log Progress'}
+        </button>
+      </div>
+
+      {/* Progress Form */}
+      {showProgressForm && (
+        <Card title="Log Today's Progress" color="text-purple-400">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={progressFormData.workout_completed}
+                  onChange={(e) => setProgressFormData({ ...progressFormData, workout_completed: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+                <span className="text-slate-300">Workout Completed</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={progressFormData.diet_followed}
+                  onChange={(e) => setProgressFormData({ ...progressFormData, diet_followed: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+                <span className="text-slate-300">Diet Followed</span>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Energy Level (1-10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={progressFormData.energy_level}
+                onChange={(e) => setProgressFormData({ ...progressFormData, energy_level: parseInt(e.target.value) })}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-slate-500 mt-1">
+                <span>Low</span>
+                <span className="text-blue-400 font-bold">{progressFormData.energy_level}</span>
+                <span>High</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Mood</label>
+              <select
+                value={progressFormData.mood}
+                onChange={(e) => setProgressFormData({ ...progressFormData, mood: e.target.value })}
+                className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+              >
+                {moods.map(mood => (
+                  <option key={mood} value={mood}>{mood}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Weight (kg) - Optional</label>
+              <input
+                type="number"
+                step="0.1"
+                value={progressFormData.weight_kg}
+                onChange={(e) => setProgressFormData({ ...progressFormData, weight_kg: e.target.value })}
+                placeholder="Enter current weight"
+                className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Notes</label>
+              <textarea
+                value={progressFormData.notes}
+                onChange={(e) => setProgressFormData({ ...progressFormData, notes: e.target.value })}
+                placeholder="How did you feel today? Any challenges or achievements?"
+                rows="3"
+                className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+              />
+            </div>
+
+            <button
+              onClick={onSaveProgress}
+              className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-colors"
+            >
+              Save Progress
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {/* Progress Entries List */}
+      {progressEntries.length > 0 ? (
+        <div className="space-y-3">
+          {progressEntries.map((entry) => (
+            <Card key={entry.id} title={new Date(entry.entry_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} color="text-green-400">
+              <div className="space-y-2">
+                {entry.progress_data.workout_completed && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <CheckCircle size={16} />
+                    <span className="text-sm">Workout Completed</span>
+                  </div>
+                )}
+                {entry.progress_data.diet_followed && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <CheckCircle size={16} />
+                    <span className="text-sm">Diet Followed</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-4 text-sm text-slate-300">
+                  <span>Energy: <span className="text-blue-400 font-bold">{entry.progress_data.energy_level}/10</span></span>
+                  <span>Mood: <span className="text-purple-400 font-bold">{entry.progress_data.mood}</span></span>
+                  {entry.progress_data.weight_kg && (
+                    <span>Weight: <span className="text-emerald-400 font-bold">{entry.progress_data.weight_kg} kg</span></span>
+                  )}
+                </div>
+                {entry.progress_data.notes && (
+                  <p className="text-sm text-slate-400 italic mt-2">"{entry.progress_data.notes}"</p>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card title="No Progress Entries Yet" color="text-slate-400">
+          <p className="text-slate-400 text-sm">Start tracking your progress by logging your daily activities!</p>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 export default PlanViewer;
