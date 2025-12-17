@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useUser, UserButton } from '@clerk/clerk-react';
-import { History, TrendingUp, Plus } from 'lucide-react';
+import { History, TrendingUp, Plus, Activity, Sparkles } from 'lucide-react';
 import Hero from './Hero';
 import UserForm from './UserForm';
 import PlanViewer from './PlanViwer';
@@ -87,32 +87,44 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white pb-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white pb-10">
       {/* Navbar */}
-      <nav className="p-6 max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg"></div>
-          <h1 className="text-2xl font-black tracking-tighter text-white">FIT<span className="text-blue-500">AI</span></h1>
-        </div>
+      <nav className="p-4 md:p-6 max-w-7xl mx-auto flex items-center justify-between border-b border-slate-800/50 backdrop-blur-sm bg-slate-900/30">
+        <motion.div 
+          className="flex items-center gap-3"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Activity className="text-white" size={20} />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            FitMind<span className="text-blue-500">AI</span>
+          </h1>
+        </motion.div>
         <div className="flex items-center gap-4">
           {user && (
-            <div className="flex items-center gap-3">
+            <motion.div 
+              className="flex items-center gap-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
               <div className="text-right hidden md:block">
-                <p className="text-sm text-slate-400">Welcome back</p>
-                <p className="text-sm font-medium text-white">{user.firstName || user.emailAddresses[0]?.emailAddress}</p>
+                <p className="text-xs text-slate-500">Welcome back</p>
+                <p className="text-sm font-semibold text-white">{user.firstName || user.emailAddresses[0]?.emailAddress}</p>
               </div>
               <UserButton 
                 appearance={{
                   elements: {
-                    avatarBox: "w-10 h-10",
-                    userButtonPopoverCard: "bg-slate-800 border-slate-700",
+                    avatarBox: "w-10 h-10 border-2 border-slate-700 hover:border-blue-500 transition-colors",
+                    userButtonPopoverCard: "bg-slate-800 border-slate-700 shadow-2xl",
                     userButtonPopoverActionButton: "text-slate-300 hover:text-white hover:bg-slate-700",
                     userButtonPopoverActionButtonText: "text-slate-300",
                     userButtonPopoverFooter: "hidden"
                   }
                 }}
               />
-            </div>
+            </motion.div>
           )}
         </div>
       </nav>
@@ -120,81 +132,128 @@ const Dashboard = () => {
       <main className="container mx-auto px-4">
         {/* Stats Bar - shown when user has data */}
         {(userStats.totalPlans > 0 || userStats.totalProgressEntries > 0) && (
-          <div className="max-w-7xl mx-auto mb-6 mt-4">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-blue-600/20 rounded-lg">
-                    <History className="text-blue-400" size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">Total Plans</p>
-                    <p className="text-lg font-bold text-white">{userStats.totalPlans}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-purple-600/20 rounded-lg">
-                    <TrendingUp className="text-purple-400" size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">Progress Entries</p>
-                    <p className="text-lg font-bold text-white">{userStats.totalProgressEntries}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {savedPlans.length > 0 && (
-                  <button
-                    onClick={() => setShowSavedPlans(!showSavedPlans)}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors flex items-center gap-2"
+          <motion.div 
+            className="max-w-7xl mx-auto mb-6 mt-6"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-slate-700/50 shadow-xl">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-6 flex-wrap">
+                  <motion.div 
+                    className="flex items-center gap-3"
+                    whileHover={{ scale: 1.05 }}
                   >
-                    <History size={16} />
-                    {showSavedPlans ? 'Hide' : 'View'} Saved Plans
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setStep(1);
-                    setShowSavedPlans(false);
-                  }}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors flex items-center gap-2"
-                >
-                  <Plus size={16} />
-                  New Plan
-                </button>
+                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30">
+                      <History className="text-blue-400" size={22} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium">Total Plans</p>
+                      <p className="text-2xl font-bold text-white">{userStats.totalPlans}</p>
+                    </div>
+                  </motion.div>
+                  <motion.div 
+                    className="flex items-center gap-3"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
+                      <TrendingUp className="text-purple-400" size={22} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium">Progress Entries</p>
+                      <p className="text-2xl font-bold text-white">{userStats.totalProgressEntries}</p>
+                    </div>
+                  </motion.div>
+                </div>
+                <div className="flex gap-3 w-full md:w-auto">
+                  {savedPlans.length > 0 && (
+                    <motion.button
+                      onClick={() => setShowSavedPlans(!showSavedPlans)}
+                      className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-sm font-medium text-white transition-all border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <History size={16} />
+                      {showSavedPlans ? 'Hide' : 'View'} Plans
+                    </motion.button>
+                  )}
+                  <motion.button
+                    onClick={() => {
+                      setStep(1);
+                      setShowSavedPlans(false);
+                    }}
+                    className="flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-sm font-semibold text-white transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Plus size={16} />
+                    New Plan
+                  </motion.button>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Saved Plans List */}
         {showSavedPlans && savedPlans.length > 0 && (
-          <div className="max-w-7xl mx-auto mb-6">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-              <h3 className="text-xl font-bold text-white mb-4">Your Saved Plans</h3>
+          <motion.div 
+            className="max-w-7xl mx-auto mb-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <History className="text-blue-400" size={20} />
+                </div>
+                <h3 className="text-xl font-bold text-white">Your Saved Plans</h3>
+                <span className="ml-auto px-3 py-1 bg-slate-700/50 rounded-full text-xs text-slate-300">
+                  {savedPlans.length} {savedPlans.length === 1 ? 'plan' : 'plans'}
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedPlans.map((savedPlan) => (
-                  <div
+                {savedPlans.map((savedPlan, index) => (
+                  <motion.div
                     key={savedPlan.id}
                     onClick={() => handleLoadSavedPlan(savedPlan.id)}
-                    className="bg-slate-900/50 p-4 rounded-lg border border-slate-700 hover:border-blue-500 cursor-pointer transition-all hover:bg-slate-800"
+                    className="bg-slate-900/50 p-5 rounded-xl border border-slate-700/50 hover:border-blue-500/50 cursor-pointer transition-all hover:bg-slate-800/50 group relative overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                   >
-                    <p className="text-sm text-slate-400 mb-2">
-                      {new Date(savedPlan.created_at).toLocaleDateString()}
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <p className="text-xs text-slate-500 mb-2 font-medium">
+                      {new Date(savedPlan.created_at).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
                     </p>
-                    <p className="text-white font-semibold mb-1">
+                    <p className="text-white font-semibold mb-2 text-lg group-hover:text-blue-400 transition-colors">
                       {savedPlan.plan_name || 'Fitness Plan'}
                     </p>
                     {savedPlan.plan_data?.userPreferences && (
-                      <p className="text-xs text-slate-400">
-                        Goal: {savedPlan.plan_data.userPreferences.goal} • Level: {savedPlan.plan_data.userPreferences.level}
-                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-md text-xs font-medium">
+                          {savedPlan.plan_data.userPreferences.goal}
+                        </span>
+                        <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-md text-xs font-medium">
+                          {savedPlan.plan_data.userPreferences.level}
+                        </span>
+                      </div>
                     )}
-                  </div>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                      <Sparkles size={12} />
+                      <span>Click to view</span>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <AnimatePresence mode="wait">
@@ -230,4 +289,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 

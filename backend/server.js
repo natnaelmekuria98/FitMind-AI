@@ -160,5 +160,43 @@ app.post('/api/generate-image', async (req, res) => {
   }
 });
 
+// Text-to-Speech endpoint using OpenAI TTS
+app.post('/api/generate-voice', async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: "Text is required" });
+    }
+
+    if (!openai) {
+      return res.status(500).json({ error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your .env file." });
+    }
+
+    console.log(`Generating speech for text (${text.length} characters)...`);
+
+    // Use OpenAI TTS API
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1", // Options: "tts-1" (faster, cheaper) or "tts-1-hd" (higher quality)
+      voice: "alloy", // Options: "alloy", "echo", "fable", "onyx", "nova", "shimmer"
+      input: text,
+    });
+
+    // Convert response to buffer
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+
+    // Set appropriate headers for audio response
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Length', buffer.length);
+    
+    // Send the audio buffer
+    res.send(buffer);
+    console.log("Speech generated successfully.");
+  } catch (error) {
+    console.error("Voice Generation Error:", error);
+    res.status(500).json({ error: "Failed to generate speech. " + (error.message || '') });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

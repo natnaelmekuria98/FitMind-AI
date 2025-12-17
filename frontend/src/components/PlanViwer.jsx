@@ -233,72 +233,146 @@ const PlanViewer = ({ plan, onReset, planId, userId }) => {
       }, 1);
     };
 
-  // Handle Voice
-  // inside PlanViewer.jsx
+  // Handle Voice using OpenAI TTS API
+  const handleVoice = async () => {
+    try {
+      // Format the text to be readable (Human style, not JSON style)
+      let textToRead = "";
 
-const handleVoice = () => {
-  // 1. Stop any audio currently playing
-  window.speechSynthesis.cancel();
+      if (activeTab === 'workout') {
+        const dayPlan = plan.weekly_workout[0];
+        textToRead = `Here is your workout for ${dayPlan.day}. `;
+        
+        // Loop through exercises to make a sentence
+        dayPlan.exercises.forEach(ex => {
+          textToRead += `Do ${ex.name} for ${ex.sets} sets of ${ex.reps} reps. `;
+        });
 
-  // 2. Format the text to be readable (Human style, not JSON style)
-  let textToRead = "";
+      } else {
+        const dayDiet = plan.weekly_diet[0];
+        textToRead = `Here is your diet plan for ${dayDiet.day}. 
+          For Breakfast, have ${dayDiet.meals.breakfast}. 
+          For Lunch, have ${dayDiet.meals.lunch}. 
+          For Dinner, have ${dayDiet.meals.dinner}. 
+          For Snacks, have ${dayDiet.meals.snacks}.`;
+      }
 
-  if (activeTab === 'workout') {
-    const dayPlan = plan.weekly_workout[0];
-    textToRead = `Here is your workout for ${dayPlan.day}. `;
-    
-    // Loop through exercises to make a sentence
-    dayPlan.exercises.forEach(ex => {
-      textToRead += `Do ${ex.name} for ${ex.sets} sets of ${ex.reps} reps. `;
-    });
-
-  } else {
-    const dayDiet = plan.weekly_diet[0];
-    textToRead = `Here is your diet plan for ${dayDiet.day}. 
-      For Breakfast, have ${dayDiet.meals.breakfast}. 
-      For Lunch, have ${dayDiet.meals.lunch}. 
-      For Dinner, have ${dayDiet.meals.dinner}. 
-      For Snacks, have ${dayDiet.meals.snacks}.`;
-  }
-
-  // 3. Create the Speech Object
-  const utterance = new SpeechSynthesisUtterance(textToRead);
-  
-  // Optional: Customize voice
-  utterance.rate = 0.9; // Slightly slower
-  utterance.pitch = 1;
-
-  // 4. Speak
-  window.speechSynthesis.speak(utterance);
-};
+      // Import the generateVoice function
+      const { generateVoice } = await import('../Api/data');
+      
+      // Generate audio using OpenAI TTS API
+      const audioUrl = await generateVoice(textToRead);
+      setAudioUrl(audioUrl);
+      
+      // Auto-play the audio
+      const audio = new Audio(audioUrl);
+      audio.play().catch(err => {
+        console.error("Error playing audio:", err);
+        alert("Failed to play audio. Please check your browser's autoplay settings.");
+      });
+    } catch (error) {
+      console.error("Error generating voice:", error);
+      alert("Failed to generate voice. Please ensure the backend is running and OpenAI API key is configured.");
+    }
+  };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 animate-fade-in">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-slate-800/50 p-6 rounded-2xl backdrop-blur-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Your Personal AI Plan</h1>
-          <p className="text-blue-400 italic">"{plan.motivation}"</p>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 md:p-8 rounded-3xl backdrop-blur-sm border border-slate-700/50 shadow-2xl"
+      >
+        <div className="flex-1 mb-4 md:mb-0">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl">
+              <Dumbbell className="text-white" size={24} />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              Your Personal AI Plan
+            </h1>
+          </div>
+          <p className="text-blue-400/90 italic text-base md:text-lg pl-11">"{plan.motivation}"</p>
         </div>
-        <div className="flex gap-3 mt-4 md:mt-0">
-          <button onClick={handleExport} className="btn-icon"><Download size={20}/></button>
-          <button onClick={onReset} className="btn-icon"><RefreshCw size={20}/></button>
+        <div className="flex gap-3 w-full md:w-auto">
+          <motion.button 
+            onClick={handleExport} 
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-slate-700/50 hover:bg-blue-600 rounded-xl text-white transition-all border border-slate-600 hover:border-blue-500 group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Download as PDF"
+          >
+            <Download size={18} className="group-hover:animate-bounce" />
+            <span className="hidden md:inline font-medium">Export PDF</span>
+          </motion.button>
+          <motion.button 
+            onClick={onReset} 
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-slate-700/50 hover:bg-purple-600 rounded-xl text-white transition-all border border-slate-600 hover:border-purple-500 group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Create New Plan"
+          >
+            <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-500" />
+            <span className="hidden md:inline font-medium">New Plan</span>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {audioUrl && <audio controls autoPlay src={audioUrl} className="w-full mb-6" />}
+      {/* Audio Player */}
+      {audioUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Play className="text-blue-400" size={20} />
+            </div>
+            <span className="text-sm font-medium text-slate-300">Audio Guide</span>
+          </div>
+          <audio controls autoPlay src={audioUrl} className="w-full" />
+        </motion.div>
+      )}
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-slate-700 pb-1">
-        <TabButton active={activeTab === 'workout'} onClick={() => setActiveTab('workout')} icon={<Dumbbell size={18}/>} label="Workout" />
-        <TabButton active={activeTab === 'diet'} onClick={() => setActiveTab('diet')} icon={<Utensils size={18}/>} label="Diet" />
+      <div className="flex flex-wrap gap-3 mb-8 border-b border-slate-700/50 pb-4">
+        <TabButton 
+          active={activeTab === 'workout'} 
+          onClick={() => setActiveTab('workout')} 
+          icon={<Dumbbell size={18}/>} 
+          label="Workout" 
+          count={plan.weekly_workout.length}
+        />
+        <TabButton 
+          active={activeTab === 'diet'} 
+          onClick={() => setActiveTab('diet')} 
+          icon={<Utensils size={18}/>} 
+          label="Diet" 
+          count={plan.weekly_diet.length}
+        />
         {planId && (
-          <TabButton active={activeTab === 'progress'} onClick={() => setActiveTab('progress')} icon={<TrendingUp size={18}/>} label="Progress" />
+          <TabButton 
+            active={activeTab === 'progress'} 
+            onClick={() => setActiveTab('progress')} 
+            icon={<TrendingUp size={18}/>} 
+            label="Progress" 
+            count={progressEntries.length}
+          />
         )}
         
-        <button onClick={handleVoice} className="ml-auto flex items-center gap-2 text-sm text-blue-400 hover:text-white transition-colors">
-          <Play size={16} /> Read Day 1
-        </button>
+        <motion.button 
+          onClick={handleVoice} 
+          className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600 hover:to-purple-600 rounded-xl text-sm font-medium text-blue-400 hover:text-white transition-all border border-blue-500/30 hover:border-blue-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Listen to Day 1 plan"
+        >
+          <Play size={16} /> 
+          <span className="hidden sm:inline">Listen to Day 1</span>
+          <span className="sm:hidden">Listen</span>
+        </motion.button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
@@ -347,24 +421,69 @@ const handleVoice = () => {
 
         {/* Sidebar: Tips & Image Preview */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-            <h4 className="font-bold text-lg mb-4 text-white">Coach Tips</h4>
-            <ul className="list-disc list-inside text-slate-300 text-sm space-y-2">
-              {plan.tips.map((tip, i) => <li key={i}>{tip}</li>)}
+          <motion.div 
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-sm shadow-lg"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <TrendingUp className="text-yellow-400" size={20} />
+              </div>
+              <h4 className="font-bold text-lg text-white">Coach Tips</h4>
+            </div>
+            <ul className="space-y-3">
+              {plan.tips.map((tip, i) => (
+                <motion.li 
+                  key={i}
+                  className="flex items-start gap-3 text-slate-300 text-sm"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                >
+                  <span className="text-blue-400 mt-1">💡</span>
+                  <span className="leading-relaxed">{tip}</span>
+                </motion.li>
+              ))}
             </ul>
-          </div>
+          </motion.div>
 
-          <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 min-h-[300px] flex items-center justify-center relative overflow-hidden">
-            {loadingImg && <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10"><RefreshCw className="animate-spin text-white"/></div>}
+          <motion.div 
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-4 rounded-2xl border border-slate-700/50 min-h-[300px] flex items-center justify-center relative overflow-hidden backdrop-blur-sm shadow-lg"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            {loadingImg && (
+              <motion.div 
+                className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10 rounded-xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <RefreshCw className="animate-spin text-blue-400 mb-2" size={32} />
+                <p className="text-sm text-slate-300">Generating image...</p>
+              </motion.div>
+            )}
             {modalImage ? (
-               <img src={modalImage} alt="Generated" className="w-full h-full object-cover rounded-xl shadow-lg" />
+              <motion.img 
+                src={modalImage} 
+                alt="Generated" 
+                className="w-full h-full object-cover rounded-xl shadow-2xl"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              />
             ) : (
-              <div className="text-center text-slate-500">
-                <ImageIcon size={48} className="mx-auto mb-2 opacity-50"/>
-                <p className="text-sm">Click an image icon <br/> to generate visuals</p>
+              <div className="text-center text-slate-500 p-6">
+                <div className="p-4 bg-slate-700/30 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <ImageIcon size={40} className="opacity-50"/>
+                </div>
+                <p className="text-sm font-medium mb-1">Visual Preview</p>
+                <p className="text-xs text-slate-600">Click any image icon to generate visuals</p>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -372,32 +491,74 @@ const handleVoice = () => {
 };
 
 // Sub-components for cleaner code
-const TabButton = ({ active, onClick, icon, label }) => (
-  <button 
+const TabButton = ({ active, onClick, icon, label, count }) => (
+  <motion.button 
     onClick={onClick} 
-    className={`flex items-center gap-2 px-6 py-3 rounded-t-xl transition-all ${active ? 'bg-slate-800 text-white border-t border-x border-slate-700' : 'text-slate-400 hover:text-white'}`}
+    className={`relative flex items-center gap-2 px-5 py-3 rounded-xl transition-all font-medium ${
+      active 
+        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30' 
+        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+    }`}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
   >
-    {icon} {label}
-  </button>
+    {icon} 
+    <span>{label}</span>
+    {count !== undefined && (
+      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+        active ? 'bg-white/20' : 'bg-slate-700'
+      }`}>
+        {count}
+      </span>
+    )}
+    {active && (
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400"
+        layoutId="activeTab"
+        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      />
+    )}
+  </motion.button>
 );
 
 const Card = ({ title, children, color = "text-blue-400" }) => (
-  <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4 shadow-sm hover:shadow-md transition-shadow">
-    <h3 className={`text-xl font-bold ${color} mb-4 border-b border-slate-700 pb-2`}>{title}</h3>
+  <motion.div 
+    className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 rounded-2xl border border-slate-700/50 mb-4 shadow-lg hover:shadow-xl transition-all backdrop-blur-sm"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    whileHover={{ scale: 1.01 }}
+  >
+    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-700/50">
+      <div className={`p-2 bg-gradient-to-br ${color.includes('blue') ? 'from-blue-500/20 to-blue-600/20' : 'from-emerald-500/20 to-emerald-600/20'} rounded-lg`}>
+        <Dumbbell className={color} size={20} />
+      </div>
+      <h3 className={`text-xl font-bold ${color}`}>{title}</h3>
+    </div>
     <div className="space-y-3">{children}</div>
-  </div>
+  </motion.div>
 );
 
 const RowItem = ({ title, sub, onImg }) => (
-  <div className="flex justify-between items-center bg-slate-900/50 p-3 rounded-lg border border-slate-800 hover:border-slate-600 transition-colors group">
-    <div>
-      <p className="font-semibold text-slate-200">{title}</p>
-      <p className="text-xs text-slate-400 mt-1">{sub}</p>
+  <motion.div 
+    className="flex justify-between items-center bg-slate-900/50 p-4 rounded-xl border border-slate-800/50 hover:border-blue-500/50 transition-all group cursor-pointer"
+    whileHover={{ x: 4 }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+  >
+    <div className="flex-1">
+      <p className="font-semibold text-slate-200 mb-1">{title}</p>
+      <p className="text-xs text-slate-400">{sub}</p>
     </div>
-    <button onClick={onImg} className="p-2 text-slate-600 group-hover:text-blue-400 transition-colors bg-slate-800 rounded-full hover:bg-slate-700">
+    <motion.button 
+      onClick={onImg} 
+      className="p-2.5 text-slate-500 group-hover:text-blue-400 transition-colors bg-slate-800/50 rounded-xl hover:bg-blue-500/20 border border-slate-700 group-hover:border-blue-500/50"
+      whileHover={{ scale: 1.1, rotate: 5 }}
+      whileTap={{ scale: 0.9 }}
+      title="Generate image"
+    >
       <ImageIcon size={18} />
-    </button>
-  </div>
+    </motion.button>
+  </motion.div>
 );
 
 // Progress Tracking Component
