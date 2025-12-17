@@ -6,7 +6,7 @@ import { Activity } from 'lucide-react';
 
 const SignIn = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -14,21 +14,21 @@ const SignIn = () => {
         className="w-full max-w-md"
       >
         {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Activity className="text-white" size={24} />
+        <div className="text-center mb-6 sm:mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Activity className="text-white w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h1 className="text-3xl font-black tracking-tighter text-white">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-white">
               FIT<span className="text-blue-500">AI</span>
             </h1>
           </Link>
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-slate-400">Sign in to continue your fitness journey</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Welcome Back</h2>
+          <p className="text-sm sm:text-base text-slate-400">Sign in to continue your fitness journey</p>
         </div>
 
         {/* Clerk Sign In Component */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700 shadow-2xl">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-700 shadow-2xl">
           <ClerkSignIn
             routing="path"
             path="/sign-in"

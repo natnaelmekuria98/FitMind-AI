@@ -89,34 +89,34 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white pb-10">
       {/* Navbar */}
-      <nav className="p-4 md:p-6 max-w-7xl mx-auto flex items-center justify-between border-b border-slate-800/50 backdrop-blur-sm bg-slate-900/30">
+      <nav className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto flex items-center justify-between border-b border-slate-800/50 backdrop-blur-sm bg-slate-900/30 sticky top-0 z-40">
         <motion.div 
-          className="flex items-center gap-3"
+          className="flex items-center gap-2 sm:gap-3"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <Activity className="text-white" size={20} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Activity className="text-white w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
             FitMind<span className="text-blue-500">AI</span>
           </h1>
         </motion.div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {user && (
             <motion.div 
-              className="flex items-center gap-3"
+              className="flex items-center gap-2 sm:gap-3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <div className="text-right hidden md:block">
+              <div className="text-right hidden sm:block">
                 <p className="text-xs text-slate-500">Welcome back</p>
-                <p className="text-sm font-semibold text-white">{user.firstName || user.emailAddresses[0]?.emailAddress}</p>
+                <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[120px] sm:max-w-none">{user.firstName || user.emailAddresses[0]?.emailAddress}</p>
               </div>
               <UserButton 
                 appearance={{
                   elements: {
-                    avatarBox: "w-10 h-10 border-2 border-slate-700 hover:border-blue-500 transition-colors",
+                    avatarBox: "w-8 h-8 sm:w-10 sm:h-10 border-2 border-slate-700 hover:border-blue-500 transition-colors",
                     userButtonPopoverCard: "bg-slate-800 border-slate-700 shadow-2xl",
                     userButtonPopoverActionButton: "text-slate-300 hover:text-white hover:bg-slate-700",
                     userButtonPopoverActionButtonText: "text-slate-300",
@@ -129,7 +129,7 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4">
+      <main className="container mx-auto px-3 sm:px-4">
         {/* Stats Bar - shown when user has data */}
         {(userStats.totalPlans > 0 || userStats.totalProgressEntries > 0) && (
           <motion.div 
@@ -137,44 +137,47 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-slate-700/50 shadow-xl">
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-slate-700/50 shadow-xl">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-4 sm:gap-6 flex-wrap w-full md:w-auto">
                   <motion.div 
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-none"
                     whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30">
-                      <History className="text-blue-400" size={22} />
+                    <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg sm:rounded-xl border border-blue-500/30">
+                      <History className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 font-medium">Total Plans</p>
-                      <p className="text-2xl font-bold text-white">{userStats.totalPlans}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-white">{userStats.totalPlans}</p>
                     </div>
                   </motion.div>
                   <motion.div 
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-none"
                     whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
-                      <TrendingUp className="text-purple-400" size={22} />
+                    <div className="p-2 sm:p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg sm:rounded-xl border border-purple-500/30">
+                      <TrendingUp className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 font-medium">Progress Entries</p>
-                      <p className="text-2xl font-bold text-white">{userStats.totalProgressEntries}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-white">{userStats.totalProgressEntries}</p>
                     </div>
                   </motion.div>
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex gap-2 sm:gap-3 w-full md:w-auto">
                   {savedPlans.length > 0 && (
                     <motion.button
                       onClick={() => setShowSavedPlans(!showSavedPlans)}
-                      className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-sm font-medium text-white transition-all border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2"
+                      className="flex-1 md:flex-none px-4 sm:px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-xs sm:text-sm font-medium text-white transition-all border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2 touch-manipulation min-h-[44px]"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <History size={16} />
-                      {showSavedPlans ? 'Hide' : 'View'} Plans
+                      <History size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">{showSavedPlans ? 'Hide' : 'View'} Plans</span>
+                      <span className="xs:hidden">{showSavedPlans ? 'Hide' : 'View'}</span>
                     </motion.button>
                   )}
                   <motion.button
@@ -182,12 +185,13 @@ const Dashboard = () => {
                       setStep(1);
                       setShowSavedPlans(false);
                     }}
-                    className="flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-sm font-semibold text-white transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                    className="flex-1 md:flex-none px-4 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-xs sm:text-sm font-semibold text-white transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 touch-manipulation min-h-[44px]"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Plus size={16} />
-                    New Plan
+                    <Plus size={14} className="sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">New Plan</span>
+                    <span className="xs:hidden">New</span>
                   </motion.button>
                 </div>
               </div>

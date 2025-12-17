@@ -19,35 +19,35 @@ const Hero = ({ onStart }) => {
     >
       {/* Animated Icon */}
       <motion.div 
-        className="flex justify-center mb-8"
+        className="flex justify-center mb-6 sm:mb-8"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
       >
         <div className="relative">
           <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
-          <div className="relative p-6 bg-gradient-to-br from-blue-600/30 to-purple-600/30 rounded-full backdrop-blur-sm border border-blue-500/20">
-            <Activity size={56} className="text-blue-400" />
+          <div className="relative p-4 sm:p-6 bg-gradient-to-br from-blue-600/30 to-purple-600/30 rounded-full backdrop-blur-sm border border-blue-500/20">
+            <Activity size={40} className="sm:w-14 sm:h-14 text-blue-400" />
           </div>
         </div>
       </motion.div>
       
       {/* Main Heading */}
       <motion.h1 
-        className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight"
+        className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-extrabold mb-4 sm:mb-6 tracking-tight px-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <span className="text-white">Your AI </span>
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient">
+        <span className="text-white block sm:inline">Your AI </span>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient block sm:inline">
           Fitness Coach
         </span>
       </motion.h1>
       
       {/* Subtitle */}
       <motion.p 
-        className="text-lg md:text-xl lg:text-2xl text-slate-300 mb-4 max-w-3xl mx-auto leading-relaxed"
+        className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -56,7 +56,7 @@ const Hero = ({ onStart }) => {
       </motion.p>
       
       <motion.p 
-        className="text-sm md:text-base text-slate-500 mb-10 max-w-2xl mx-auto"
+        className="text-xs sm:text-sm md:text-base text-slate-500 mb-6 sm:mb-10 max-w-2xl mx-auto px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
@@ -66,7 +66,7 @@ const Hero = ({ onStart }) => {
 
       {/* Feature Pills */}
       <motion.div 
-        className="flex flex-wrap justify-center gap-3 mb-10 px-4"
+        className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-10 px-2 sm:px-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
@@ -76,12 +76,13 @@ const Hero = ({ onStart }) => {
           return (
             <motion.div
               key={index}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full text-slate-300 text-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-full text-slate-300 text-xs sm:text-sm"
               whileHover={{ scale: 1.05, borderColor: 'rgb(59 130 246)' }}
+              whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <Icon size={16} className="text-blue-400" />
-              <span>{feature.text}</span>
+              <Icon size={14} className="sm:w-4 sm:h-4 text-blue-400" />
+              <span className="whitespace-nowrap">{feature.text}</span>
             </motion.div>
           );
         })}
@@ -90,7 +91,7 @@ const Hero = ({ onStart }) => {
       {/* CTA Button */}
       <motion.button 
         onClick={onStart} 
-        className="group relative inline-flex items-center justify-center px-10 py-5 font-bold text-lg text-white transition-all duration-300 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 hover:scale-105 focus:outline-none ring-offset-2 focus:ring-2 ring-blue-400 shadow-2xl shadow-blue-500/50"
+        className="group relative inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-5 font-bold text-base sm:text-lg text-white transition-all duration-300 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 focus:outline-none ring-offset-2 focus:ring-2 ring-blue-400 shadow-2xl shadow-blue-500/50 touch-manipulation"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
@@ -98,20 +99,27 @@ const Hero = ({ onStart }) => {
         whileTap={{ scale: 0.95 }}
       >
         <span className="relative z-10 flex items-center gap-2">
-          Start Your Transformation
-          <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform" size={20} />
+          <span className="hidden sm:inline">Start Your Transformation</span>
+          <span className="sm:hidden">Get Started</span>
+          <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform w-4 h-4 sm:w-5 sm:h-5" />
         </span>
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
       </motion.button>
 
       {/* Trust Indicators */}
       <motion.div 
-        className="mt-12 text-sm text-slate-500"
+        className="mt-8 sm:mt-12 text-xs sm:text-sm text-slate-500 px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        <p>✨ Free to use • 🔒 Secure & Private • ⚡ Instant Results</p>
+        <p className="flex flex-wrap justify-center gap-2 sm:gap-4">
+          <span>✨ Free to use</span>
+          <span className="hidden sm:inline">•</span>
+          <span>🔒 Secure & Private</span>
+          <span className="hidden sm:inline">•</span>
+          <span>⚡ Instant Results</span>
+        </p>
       </motion.div>
     </motion.div>
   );

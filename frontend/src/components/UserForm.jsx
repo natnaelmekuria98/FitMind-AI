@@ -35,8 +35,8 @@ const UserForm = ({ onSubmit, loading }) => {
     }
   };
 
-  const inputClass = "w-full p-4 rounded-xl bg-slate-900/50 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all hover:border-slate-600";
-  const labelClass = "block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2";
+  const inputClass = "w-full p-3 sm:p-4 rounded-xl bg-slate-900/50 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all hover:border-slate-600 text-base sm:text-sm touch-manipulation";
+  const labelClass = "block text-xs sm:text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2";
 
   const fieldConfigs = [
     { 
@@ -145,28 +145,28 @@ const UserForm = ({ onSubmit, loading }) => {
     <motion.div 
       initial={{ opacity: 0, x: 50 }} 
       animate={{ opacity: 1, x: 0 }}
-      className="max-w-3xl mx-auto bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-8 md:p-10 rounded-3xl shadow-2xl border border-slate-700/50 backdrop-blur-sm mt-6"
+      className="max-w-3xl mx-auto bg-gradient-to-br from-slate-800/90 to-slate-900/90 p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-700/50 backdrop-blur-sm mt-4 sm:mt-6 mx-2 sm:mx-4"
     >
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 sm:mb-8">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", delay: 0.2 }}
-          className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl mb-4"
+          className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl sm:rounded-2xl mb-3 sm:mb-4"
         >
-          <User className="text-white" size={32} />
+          <User className="text-white w-6 h-6 sm:w-8 sm:h-8" />
         </motion.div>
-        <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent px-2">
           Tell Us About Yourself
         </h2>
-        <p className="text-slate-400 text-sm md:text-base">
+        <p className="text-slate-400 text-xs sm:text-sm md:text-base px-2">
           Help us create the perfect fitness plan tailored just for you
         </p>
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs font-medium text-slate-400">Form Progress</span>
           <span className="text-xs font-bold text-blue-400">{Math.round(progress)}%</span>
@@ -181,7 +181,7 @@ const UserForm = ({ onSubmit, loading }) => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {fieldConfigs.map((field, index) => {
           const Icon = field.icon;
           const hasError = errors[field.name];
@@ -289,7 +289,7 @@ const UserForm = ({ onSubmit, loading }) => {
       <motion.button 
         onClick={handleSubmit} 
         disabled={loading || !formData.name || !formData.age || !formData.weight}
-        className="w-full mt-8 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 py-5 rounded-xl font-bold text-lg text-white transition-all flex justify-center items-center shadow-2xl shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+        className="w-full mt-6 sm:mt-8 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg text-white transition-all flex justify-center items-center shadow-2xl shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group touch-manipulation min-h-[48px]"
         whileHover={{ scale: loading ? 1 : 1.02 }}
         whileTap={{ scale: loading ? 1 : 0.98 }}
       >
