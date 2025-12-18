@@ -247,10 +247,32 @@ CREATE TABLE user_profiles (
   first_name TEXT,
   last_name TEXT,
   email TEXT,
+  age INTEGER,
+  gender TEXT,
+  weight_kg DECIMAL(5,2),
+  fitness_goal TEXT,
+  fitness_level TEXT,
+  workout_location TEXT,
+  dietary_preference TEXT,
+  preferred_ai_model TEXT DEFAULT 'gemini',
+  form_data JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
+
+**Fields Description:**
+- `clerk_user_id`: Unique identifier from Clerk authentication
+- `first_name`, `last_name`, `email`: User's basic information
+- `age`: User's age
+- `gender`: User's gender (Male, Female, Other)
+- `weight_kg`: Current weight in kilograms
+- `fitness_goal`: Primary fitness goal (Weight Loss, Muscle Gain, Endurance, etc.)
+- `fitness_level`: Current fitness level (Beginner, Intermediate, Advanced)
+- `workout_location`: Where user works out (Gym, Home)
+- `dietary_preference`: Dietary restrictions/preferences (Non-Veg, Veg, Vegan, Keto, etc.)
+- `preferred_ai_model`: Preferred AI model for plan generation (gemini, openai)
+- `form_data`: Complete form data stored as JSON for easy access
 
 ### 2. Fitness Plans Table
 
@@ -628,3 +650,4 @@ Need help? Have questions? We're here for you!
 [⭐ Star us on GitHub](#) | [🐛 Report Bug](#) | [💡 Request Feature](#)
 
 </div>
+# FItMindAI
