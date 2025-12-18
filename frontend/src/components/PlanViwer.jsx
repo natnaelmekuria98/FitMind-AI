@@ -44,24 +44,45 @@ const PlanViewer = ({ plan, onReset, planId, userId }) => {
 
   const loadProgressEntries = async () => {
     try {
+      console.log('🔄 [PlanViewer] Loading progress entries...');
+      console.log('🔄 [PlanViewer] Plan ID:', planId);
+      console.log('🔄 [PlanViewer] User ID:', userId);
       const entries = await dbService.getProgressEntries(userId, planId);
       setProgressEntries(entries);
+      console.log(`✅ [PlanViewer] Loaded ${entries.length} progress entries`);
     } catch (error) {
-      console.error('Error loading progress entries:', error);
+      console.error('❌ [PlanViewer] Error loading progress entries:', error);
+      console.error('❌ [PlanViewer] Error details:', {
+        message: error.message,
+        code: error.code
+      });
     }
   };
 
   const handleSaveProgress = async () => {
     if (!planId || !userId) {
+      console.warn('⚠️ [PlanViewer] Cannot save progress - plan not saved to database yet');
       alert('Plan must be saved first before tracking progress');
       return;
     }
 
     try {
+      console.log('💾 [PlanViewer] Saving progress entry...');
+      console.log('💾 [PlanViewer] Progress data:', {
+        workoutCompleted: progressFormData.workout_completed,
+        dietFollowed: progressFormData.diet_followed,
+        energyLevel: progressFormData.energy_level,
+        mood: progressFormData.mood,
+        weight: progressFormData.weight_kg,
+        hasNotes: !!progressFormData.notes
+      });
+
       await dbService.saveProgressEntry(userId, planId, {
         ...progressFormData,
         weight_kg: progressFormData.weight_kg ? parseFloat(progressFormData.weight_kg) : null
       });
+      
+      console.log('✅ [PlanViewer] Progress entry saved successfully');
       
       // Reset form and reload entries
       setProgressFormData({
@@ -78,7 +99,12 @@ const PlanViewer = ({ plan, onReset, planId, userId }) => {
       await loadProgressEntries();
       alert('Progress saved successfully!');
     } catch (error) {
-      console.error('Error saving progress:', error);
+      console.error('❌ [PlanViewer] Error saving progress:', error);
+      console.error('❌ [PlanViewer] Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+      });
       alert('Failed to save progress. Please try again.');
     }
   };

@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Info, User, Calendar, Scale, Target, TrendingUp, Home, UtensilsCrossed, Sparkles, CheckCircle2 } from 'lucide-react';
 
-const UserForm = ({ onSubmit, loading }) => {
-  const [formData, setFormData] = useState({
-    name: '', age: '', gender: 'Male', weight: '',
-    goal: 'Weight Loss', level: 'Beginner', location: 'Gym', dietary: 'Non-Veg', model: 'gemini'
-  });
+const UserForm = ({ onSubmit, loading, initialData }) => {
+  // Initialize form data with saved profile data if available
+  const getInitialFormData = (data) => {
+    if (data) {
+      return {
+        name: data.name || '',
+        age: data.age || '',
+        gender: data.gender || 'Male',
+        weight: data.weight || '',
+        goal: data.goal || 'Weight Loss',
+        level: data.level || 'Beginner',
+        location: data.location || 'Gym',
+        dietary: data.dietary || 'Non-Veg',
+        model: data.model || 'gemini'
+      };
+    }
+    return {
+      name: '', age: '', gender: 'Male', weight: '',
+      goal: 'Weight Loss', level: 'Beginner', location: 'Gym', dietary: 'Non-Veg', model: 'gemini'
+    };
+  };
 
+  const [formData, setFormData] = useState(() => getInitialFormData(initialData));
   const [showTooltip, setShowTooltip] = useState(null);
   const [errors, setErrors] = useState({});
+
+  // Update form data when initialData changes (e.g., when profile loads)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(getInitialFormData(initialData));
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -163,6 +187,16 @@ const UserForm = ({ onSubmit, loading }) => {
         <p className="text-slate-400 text-xs sm:text-sm md:text-base px-2">
           Help us create the perfect fitness plan tailored just for you
         </p>
+        {initialData && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full text-xs sm:text-sm text-green-400"
+          >
+            <CheckCircle2 size={14} className="sm:w-4 sm:h-4" />
+            <span>Your saved information has been loaded</span>
+          </motion.div>
+        )}
       </div>
 
       {/* Progress Bar */}

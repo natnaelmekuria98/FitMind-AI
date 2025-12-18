@@ -96,9 +96,20 @@ async function generateWithOpenAI(prompt) {
 
 
 app.post('/api/generate-plan', async (req, res) => {
-  const { name, goal, level, dietary, model: selectedModel = 'gemini' } = req.body;
+  const requestId = Date.now().toString(36);
+  const { name, goal, level, dietary, model: selectedModel = 'gemini', age, gender, weight, location } = req.body;
   
-  console.log(`Generating plan for: ${name} (${goal}) using ${selectedModel}...`);
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log(`📋 [BACKEND] Plan Generation Request #${requestId}`);
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log(`👤 User: ${name || 'Unknown'}`);
+  console.log(`🎯 Goal: ${goal || 'Not specified'}`);
+  console.log(`📊 Level: ${level || 'Not specified'}`);
+  console.log(`🍽️  Dietary: ${dietary || 'Not specified'}`);
+  console.log(`🤖 AI Model: ${selectedModel}`);
+  console.log(`📝 Additional Info: Age=${age || 'N/A'}, Gender=${gender || 'N/A'}, Weight=${weight || 'N/A'}kg, Location=${location || 'N/A'}`);
+  console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
+  console.log('───────────────────────────────────────────────────────────');
 
   const prompt = `
     Generate a fitness and diet plan for:
@@ -117,21 +128,52 @@ app.post('/api/generate-plan', async (req, res) => {
     }
   `;
 
+  const startTime = Date.now();
   try {
     let plan;
     
     // Route to appropriate model based on selection
     if (selectedModel === 'openai') {
+      console.log(`🤖 [BACKEND] Using OpenAI GPT-4o Mini model...`);
       plan = await generateWithOpenAI(prompt);
     } else {
-      // Default to Gemini
+      console.log(`🤖 [BACKEND] Using Google Gemini 2.5 Flash model...`);
       plan = await generateWithGemini(prompt);
     }
 
+    const duration = Date.now() - startTime;
+    
+    console.log(`✅ [BACKEND] Plan generated successfully in ${duration}ms`);
+    console.log(`✅ [BACKEND] Plan structure:`, {
+      hasMotivation: !!plan.motivation,
+      tipsCount: plan.tips?.length || 0,
+      workoutDays: plan.weekly_workout?.length || 0,
+      dietDays: plan.weekly_diet?.length || 0,
+      totalExercises: plan.weekly_workout?.reduce((sum, day) => sum + (day.exercises?.length || 0), 0) || 0
+    });
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(`✅ [BACKEND] Request #${requestId} completed successfully`);
+    console.log('═══════════════════════════════════════════════════════════\n');
+
     res.json(plan);
-    console.log(`Plan generated successfully using ${selectedModel}.`);
   } catch (err) {
-    console.error("Backend Error Details:", err);
+    const duration = Date.now() - startTime;
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error(`❌ [BACKEND] Plan Generation Failed #${requestId}`);
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error(`⏱️  Duration: ${duration}ms`);
+    console.error(`❌ Error Type: ${err.constructor.name}`);
+    console.error(`❌ Error Message: ${err.message}`);
+    
+    if (err.response) {
+      console.error(`❌ Response Status: ${err.response.status}`);
+      console.error(`❌ Response Data:`, err.response.data);
+    }
+    
+    if (err.stack) {
+      console.error(`❌ Stack Trace:`, err.stack);
+    }
+    console.error('═══════════════════════════════════════════════════════════\n');
     
     // Handle Gemini-specific errors
     if (err.response && err.response.promptFeedback && err.response.promptFeedback.blockReason) {
@@ -199,4 +241,16 @@ app.post('/api/generate-voice', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('🚀 FitMind AI Backend Server');
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`📡 Available endpoints:`);
+  console.log(`   - POST /api/generate-plan`);
+  console.log(`   - POST /api/generate-image`);
+  console.log(`   - POST /api/generate-voice`);
+  console.log(`⏰ Started at: ${new Date().toISOString()}`);
+  console.log('═══════════════════════════════════════════════════════════\n');
+});

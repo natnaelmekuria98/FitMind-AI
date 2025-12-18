@@ -17,57 +17,157 @@ const Dashboard = () => {
   const [showSavedPlans, setShowSavedPlans] = useState(false);
   const [currentPlanId, setCurrentPlanId] = useState(null);
   const [userStats, setUserStats] = useState({ totalPlans: 0, totalProgressEntries: 0 });
+  const [userProfile, setUserProfile] = useState(null);
 
-  // Load saved plans and stats on mount
+  // Load saved plans, stats, and user profile on mount
   useEffect(() => {
     if (user?.id) {
       loadSavedPlans();
       loadUserStats();
+      loadUserProfile();
     }
   }, [user?.id]);
 
   const loadSavedPlans = async () => {
     try {
+      console.log('🔄 [Dashboard] Loading saved plans...');
       const plans = await dbService.getUserFitnessPlans(user.id);
       setSavedPlans(plans);
+      console.log(`✅ [Dashboard] Loaded ${plans.length} saved plans`);
     } catch (error) {
-      console.error('Error loading saved plans:', error);
+      console.error('❌ [Dashboard] Error loading saved plans:', error);
     }
   };
 
   const loadUserStats = async () => {
     try {
+      console.log('🔄 [Dashboard] Loading user statistics...');
       const stats = await dbService.getUserStats(user.id);
       setUserStats(stats);
+      console.log(`✅ [Dashboard] User stats loaded:`, stats);
     } catch (error) {
-      console.error('Error loading user stats:', error);
+      console.error('❌ [Dashboard] Error loading user stats:', error);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      console.log('🔄 [Dashboard] Loading user profile...');
+      const profile = await dbService.getUserProfile(user.id);
+      if (profile) {
+        setUserProfile(profile);
+        console.log('✅ [Dashboard] User profile loaded and form will be pre-filled');
+      } else {
+        console.log('ℹ️ [Dashboard] No existing profile found - user will fill form from scratch');
+      }
+    } catch (error) {
+      console.error('❌ [Dashboard] Error loading user profile:', error);
+      // It's okay if profile doesn't exist yet
     }
   };
 
   const handleFormSubmit = async (formData) => {
     setLoading(true);
+    console.log('🚀 [Dashboard] Form submitted - Starting plan generation process...');
+    console.log('🚀 [Dashboard] Form data:', {
+      name: formData.name,
+      age: formData.age,
+      gender: formData.gender,
+      weight: formData.weight,
+      goal: formData.goal,
+      level: formData.level,
+      location: formData.location,
+      dietary: formData.dietary,
+      model: formData.model
+    });
+
     try {
+      // Save user profile information to Supabase
+      if (user?.id) {
+        try {
+          console.log('💾 [Dashboard] Preparing to save user profile to database...');
+          const profileData = {
+            first_name: formData.name.split(' ')[0] || formData.name,
+            last_name: formData.name.split(' ').slice(1).join(' ') || '',
+            email: user.emailAddresses[0]?.emailAddress || '',
+            age: parseInt(formData.age) || null,
+            gender: formData.gender || null,
+            weight_kg: parseFloat(formData.weight) || null,
+            fitness_goal: formData.goal || null,
+            fitness_level: formData.level || null,
+            workout_location: formData.location || null,
+            dietary_preference: formData.dietary || null,
+            preferred_ai_model: formData.model || 'gemini',
+            // Store full form data as JSON for easy access
+            form_data: formData
+          };
+
+          await dbService.createOrUpdateUserProfile(user.id, profileData);
+          setUserProfile(profileData);
+          console.log('✅ [Dashboard] User profile saved successfully - data persisted to database');
+        } catch (profileError) {
+          console.error('❌ [Dashboard] Error saving user profile:', profileError);
+          console.error('❌ [Dashboard] Profile error details:', {
+            message: profileError.message,
+            code: profileError.code,
+            details: profileError.details
+          });
+          // Continue even if profile save fails - plan generation can still proceed
+        }
+      } else {
+        console.warn('⚠️ [Dashboard] No user ID available - skipping profile save');
+      }
+
+      // Generate the fitness plan
+      console.log('🤖 [Dashboard] Requesting plan generation from backend...');
+      console.log('🤖 [Dashboard] Using AI model:', formData.model);
       const data = await generatePlan(formData);
+      console.log('✅ [Dashboard] Plan generated successfully');
+      console.log('✅ [Dashboard] Plan includes:', {
+        workoutDays: data.weekly_workout?.length || 0,
+        dietDays: data.weekly_diet?.length || 0,
+        hasMotivation: !!data.motivation,
+        tipsCount: data.tips?.length || 0
+      });
       setPlan(data);
       
       // Save plan to Supabase
       if (user?.id) {
         try {
+          console.log('💾 [Dashboard] Saving fitness plan to database...');
           const savedPlan = await dbService.saveFitnessPlan(user.id, {
             ...data,
             userPreferences: formData
           });
           setCurrentPlanId(savedPlan.id);
+          console.log('✅ [Dashboard] Fitness plan saved to database with ID:', savedPlan.id);
+          
+          // Reload stats and plans
           await loadSavedPlans();
           await loadUserStats();
+          console.log('✅ [Dashboard] Dashboard data refreshed');
         } catch (dbError) {
-          console.error('Error saving plan to database:', dbError);
+          console.error('❌ [Dashboard] Error saving plan to database:', dbError);
+          console.error('❌ [Dashboard] Plan save error details:', {
+            message: dbError.message,
+            code: dbError.code,
+            details: dbError.details
+          });
           // Continue even if save fails - plan is still displayed
         }
+      } else {
+        console.warn('⚠️ [Dashboard] No user ID available - plan not saved to database');
       }
       
+      console.log('✅ [Dashboard] Plan generation process completed successfully');
       setStep(2);
     } catch (error) {
+      console.error('❌ [Dashboard] Plan generation failed:', error);
+      console.error('❌ [Dashboard] Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       alert("Failed to generate plan. Ensure Backend is running.");
     }
     setLoading(false);
@@ -75,13 +175,20 @@ const Dashboard = () => {
 
   const handleLoadSavedPlan = async (planId) => {
     try {
+      console.log('🔄 [Dashboard] Loading saved plan...');
+      console.log('🔄 [Dashboard] Plan ID:', planId);
       const savedPlan = await dbService.getFitnessPlan(planId, user.id);
       setPlan(savedPlan.plan_data);
       setCurrentPlanId(savedPlan.id);
       setStep(2);
       setShowSavedPlans(false);
+      console.log('✅ [Dashboard] Saved plan loaded successfully');
     } catch (error) {
-      console.error('Error loading saved plan:', error);
+      console.error('❌ [Dashboard] Error loading saved plan:', error);
+      console.error('❌ [Dashboard] Error details:', {
+        message: error.message,
+        code: error.code
+      });
       alert('Failed to load saved plan');
     }
   };
@@ -267,7 +374,12 @@ const Dashboard = () => {
           )}
 
           {step === 1 && (
-            <UserForm key="form" onSubmit={handleFormSubmit} loading={loading} />
+            <UserForm 
+              key="form" 
+              onSubmit={handleFormSubmit} 
+              loading={loading}
+              initialData={userProfile?.form_data}
+            />
           )}
 
           {step === 2 && plan && (
